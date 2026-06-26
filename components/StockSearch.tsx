@@ -37,7 +37,11 @@ export default function StockSearch({ onSearch }: StockSearchProps) {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (ticker.trim()) {
-      onSearch(ticker.trim().toUpperCase());
+      if (suggestions.length > 0) {
+        onSearch(suggestions[0].symbol);
+      } else {
+        onSearch(ticker.trim().toUpperCase());
+      }
       setShowSuggestions(false);
     }
   };

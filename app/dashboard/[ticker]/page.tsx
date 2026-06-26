@@ -144,7 +144,7 @@ export default function StockDetailPage({ params }: PageProps) {
     if (timeframe === "1W") {
       const intraday = data?.intraday || [];
       if (intraday.length) return intraday;
-      
+
       const cutoff = new Date();
       cutoff.setDate(now.getDate() - 7);
       return historical.filter(d => new Date(d.date) >= cutoff);
@@ -162,6 +162,28 @@ export default function StockDetailPage({ params }: PageProps) {
 
     return historical.filter(d => new Date(d.date) >= cutoff);
   }, [historical, data?.intraday, timeframe]);
+
+  // Compute stats over selected timeframe (e.g. 1D, 1W, 1M, etc.)
+  const timeframeStats = useMemo(() => {
+    if (filteredHistorical.length < 2) {
+      const change = quote?.regularMarketChange || 0;
+      const changePercent = quote?.regularMarketChangePercent || 0;
+      return {
+        change,
+        changePercent,
+        isUp: change >= 0
+      };
+    }
+    const startPrice = filteredHistorical[0].close;
+    const endPrice = filteredHistorical[filteredHistorical.length - 1].close;
+    const change = endPrice - startPrice;
+    const changePercent = startPrice > 0 ? (change / startPrice) * 100 : 0;
+    return {
+      change,
+      changePercent,
+      isUp: change >= 0
+    };
+  }, [filteredHistorical, quote]);
 
   // Map filtered points to coordinates
   const chartPathData = useMemo(() => {
@@ -321,6 +343,9 @@ export default function StockDetailPage({ params }: PageProps) {
           "1M": { low: 0, med: 0, high: 0 },
           "6M": { low: 0, med: 0, high: 0 },
           "1Y": { low: 0, med: 0, high: 0 },
+          "3Y": { low: 0, med: 0, high: 0 },
+          "5Y": { low: 0, med: 0, high: 0 },
+          "10Y": { low: 0, med: 0, high: 0 },
         },
         insights: "Insufficient historical data to construct a valid forecasting simulation."
       };
@@ -366,6 +391,9 @@ export default function StockDetailPage({ params }: PageProps) {
       "1M": project(30),
       "6M": project(182),
       "1Y": project(365),
+      "3Y": project(1095),
+      "5Y": project(1825),
+      "10Y": project(3650),
     };
 
     // Construct highly descriptive and custom text insights
@@ -378,9 +406,12 @@ export default function StockDetailPage({ params }: PageProps) {
     else if (cagr > 0.05) trendDescription = "showing solid linear gains";
     else if (cagr < -0.05) trendDescription = "experiencing downward pressure and structural headwinds";
 
-    const insights = `Our quantitative model evaluated the trading patterns of ${quote.symbol} over the last ${years.toFixed(1)} years. The stock operates with an annualized volatility of ${(volatility * 100).toFixed(1)}% (${riskClassification}) and a compound annual growth rate (CAGR) of ${(cagr * 100).toFixed(1)}%, indicating it is ${trendDescription}. 
+    const insights = `[BEARBULL QUANTITATIVE REPORT]
+Our proprietary quantitative model has evaluated the historical trading performance and volatility metrics of ${quote.symbol} over a ${years.toFixed(1)}-year observation period. The stock operates with an annualized volatility of ${(volatility * 100).toFixed(1)}%, which classifies it under a "${riskClassification}" profile, indicating ${volatility > 0.30 ? 'substantial price dispersion and active trading swings' : 'stable trading bands with moderate fluctuations'}. Concurrently, the stock has exhibited a compound annual growth rate (CAGR) of ${(cagr * 100).toFixed(1)}% (${trendDescription}).
 
-Based on BearBull predictive simulations, we project the stock's 1-year median price target to be ${formatRupee(targets["1Y"].med)} (in Rupees). Under optimal market conditions (95th percentile), the price could reach up to ${formatRupee(targets["1Y"].high)}. Conversely, during a bearish downturn, the statistical support floor is situated around ${formatRupee(targets["1Y"].low)}.`;
+From a mid-term perspective, our 1-month projections place the median target at ${formatRupee(targets["1M"].med)}, with a support floor of ${formatRupee(targets["1M"].low)} and a resistance ceiling of ${formatRupee(targets["1M"].high)}. Looking further to 6 months, the median estimate moves to ${formatRupee(targets["6M"].med)} (bearish floor of ${formatRupee(targets["6M"].low)} and bullish ceiling of ${formatRupee(targets["6M"].high)}). On a 1-year horizon, the target points to ${formatRupee(targets["1Y"].med)}, presenting a potential upside of up to ${formatRupee(targets["1Y"].high)} if structural support holds.
+
+Extending the forecast timeline into the long term, the 3-year statistical projection models a median price of ${formatRupee(targets["3Y"].med)}, with a bullish expansion peak of ${formatRupee(targets["3Y"].high)} and a conservative valuation boundary at ${formatRupee(targets["3Y"].low)}. On a 5-year macro cycle, the stock's model indicates a median value of ${formatRupee(targets["5Y"].med)}, with a high boundary of ${formatRupee(targets["5Y"].high)} and a low boundary of ${formatRupee(targets["5Y"].low)}. Finally, our ultra-long-term 10-year terminal forecast projects a median price target of ${formatRupee(targets["10Y"].med)}, outlining a wide logarithmic variance between the absolute bear target of ${formatRupee(targets["10Y"].low)} and the full bull-market target of ${formatRupee(targets["10Y"].high)}. Investors are advised to manage risk dynamically given the high-volatility terminal dispersion.`;
 
     return {
       cagr: cagr * 100,
@@ -464,9 +495,9 @@ Based on BearBull predictive simulations, we project the stock's 1-year median p
               <span className="text-4xl md:text-6xl font-black text-slate-100">
                 {formatRupee(quote.regularMarketPrice)}
               </span>
-              <span className={`flex items-center gap-0.5 text-base md:text-lg font-bold px-2 py-0.5 rounded-lg ${quote.regularMarketChangePercent !== undefined && quote.regularMarketChangePercent >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
-                {quote.regularMarketChangePercent !== undefined && quote.regularMarketChangePercent >= 0 ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
-                {formatRupee(quote.regularMarketChange)} ({quote.regularMarketChangePercent?.toFixed(2)}%)
+              <span className={`flex items-center gap-0.5 text-base md:text-lg font-bold px-2 py-0.5 rounded-lg ${timeframeStats.isUp ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}`}>
+                {timeframeStats.isUp ? <TrendingUp className="h-4 w-4" /> : <TrendingDown className="h-4 w-4" />}
+                {formatRupee(timeframeStats.change)} ({timeframeStats.changePercent >= 0 ? "+" : ""}{timeframeStats.changePercent.toFixed(2)}%) <span className="ml-1 text-[11px] opacity-70">{timeframe}</span>
               </span>
             </div>
             <p className="text-xs text-slate-500">
@@ -490,12 +521,12 @@ Based on BearBull predictive simulations, we project the stock's 1-year median p
                 </div>
 
                 {/* Timeframe selector */}
-                <div className="flex gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800">
-                  {(["1M", "6M", "1Y", "5Y"] as const).map((t) => (
+                <div className="flex flex-wrap gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
+                  {(["1D", "1W", "1M", "3M", "6M", "1Y", "5Y", "MAX"] as const).map((t) => (
                     <button
                       key={t}
                       onClick={() => setTimeframe(t)}
-                      className={`px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${timeframe === t ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-slate-200"}`}
+                      className={`px-2.5 py-1 text-[11px] font-bold rounded-lg transition-all cursor-pointer ${timeframe === t ? "bg-indigo-600 text-white shadow-md" : "text-slate-400 hover:text-slate-200"}`}
                     >
                       {t}
                     </button>
@@ -594,15 +625,18 @@ Based on BearBull predictive simulations, we project the stock's 1-year median p
               </div>
 
               {/* Table of Forecast Targets */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
                 {data.aiInsights ? (
                   <>
                     {[
-                      { label: "3-Month Forecast", key: "threeMonth" },
+                      { label: "1-Month Forecast", key: "oneMonth" },
                       { label: "6-Month Forecast", key: "sixMonth" },
-                      { label: "1-Year Forecast", key: "oneYear" }
+                      { label: "1-Year Forecast", key: "oneYear" },
+                      { label: "3-Year Forecast", key: "threeYear" },
+                      { label: "5-Year Forecast", key: "fiveYear" },
+                      { label: "10-Year Forecast", key: "tenYear" }
                     ].map((item) => {
-                      const target = data.aiInsights!.targets[item.key as "threeMonth" | "sixMonth" | "oneYear"];
+                      const target = data.aiInsights!.targets[item.key as "oneMonth" | "sixMonth" | "oneYear" | "threeYear" | "fiveYear" | "tenYear"] || { low: 0, med: 0, high: 0 };
                       return (
                         <div key={item.key} className="p-4 rounded-xl border border-white/5 bg-slate-950/40 space-y-3">
                           <div className="flex justify-between items-center border-b border-white/5 pb-2">
@@ -629,12 +663,14 @@ Based on BearBull predictive simulations, we project the stock's 1-year median p
                     })}
                   </>
                 ) : (
-                  (["1M", "6M", "1Y"] as const).map((period) => {
+                  (["1M", "6M", "1Y", "3Y", "5Y", "10Y"] as const).map((period) => {
                     const target = predictions.targets[period];
                     return (
                       <div key={period} className="p-4 rounded-xl border border-white/5 bg-slate-950/40 space-y-3">
                         <div className="flex justify-between items-center border-b border-white/5 pb-2">
-                          <span className="text-xs font-bold text-slate-400">{period === "1M" ? "1-Month Forecast" : period === "6M" ? "6-Month Forecast" : "1-Year Forecast"}</span>
+                          <span className="text-xs font-bold text-slate-400">
+                            {period === "1M" ? "1-Month Forecast" : period === "6M" ? "6-Month Forecast" : period === "1Y" ? "1-Year Forecast" : period === "3Y" ? "3-Year Forecast" : period === "5Y" ? "5-Year Forecast" : "10-Year Forecast"}
+                          </span>
                           <span className="text-[10px] text-indigo-400 font-semibold px-2 py-0.5 bg-indigo-500/10 rounded">Projections</span>
                         </div>
 
@@ -696,33 +732,33 @@ Based on BearBull predictive simulations, we project the stock's 1-year median p
             <div className="rounded-2xl border border-white/10 bg-slate-900/40 p-6 backdrop-blur-md space-y-6">
               <div className="flex items-center gap-2.5">
                 <Newspaper className="h-5 w-5 text-indigo-400" />
-                <h3 className="text-lg font-extrabold text-slate-100">Top Market News</h3>
+                <h3 className="text-lg font-extrabold text-slate-100">Recent Stock News</h3>
               </div>
 
               <div className="grid grid-cols-1 gap-4">
-                {news.slice(0, 5).map((item: any, i) => (
+                {news.slice(0, 10).map((item: any, i) => (
                   <a
-                     key={i}
-                     href={item.link}
-                     target="_blank"
-                     rel="noopener noreferrer"
-                     className="p-4 rounded-xl border border-white/5 bg-slate-950/40 hover:bg-slate-900/70 hover:border-slate-800 transition-all duration-300 group block space-y-2"
+                    key={i}
+                    href={item.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-4 rounded-xl border border-white/5 bg-slate-950/40 hover:bg-slate-900/70 hover:border-slate-800 transition-all duration-300 group block space-y-2"
                   >
-                     <div className="flex justify-between items-start gap-4">
-                       <h4 className="font-semibold text-slate-200 text-sm group-hover:text-indigo-400 transition-colors leading-tight">
-                         {item.title}
-                       </h4>
-                     </div>
-                     <div className="flex items-center justify-between text-[10px] text-slate-500">
-                       <span>Publisher: <strong className="text-slate-400">{item.publisher}</strong></span>
-                       <span>{new Date(item.providerPublishTime).toLocaleDateString(undefined, { dateStyle: "medium" })}</span>
-                     </div>
+                    <div className="flex justify-between items-start gap-4">
+                      <h4 className="font-semibold text-slate-200 text-sm group-hover:text-indigo-400 transition-colors leading-tight">
+                        {item.title}
+                      </h4>
+                    </div>
+                    <div className="flex items-center justify-between text-[10px] text-slate-500">
+                      <span>Publisher: <strong className="text-slate-400">{item.publisher}</strong></span>
+                      <span>{new Date(item.providerPublishTime).toLocaleDateString(undefined, { dateStyle: "medium" })}</span>
+                    </div>
                   </a>
                 ))}
 
                 {news.length === 0 && (
                   <div className="text-sm text-slate-500 text-center py-8">
-                     No recent news articles available for this stock.
+                    No recent news articles available for this stock.
                   </div>
                 )}
               </div>

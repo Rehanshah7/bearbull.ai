@@ -1,0 +1,135 @@
+{
+  "lastUpdated": "2026-06-24T05:16:19.114Z",
+  "upcomingDividends": [
+    {
+      "company": "BSE Limited",
+      "ticker": "BSE.NS",
+      "amount": "₹10.00 per share",
+      "exDate": "2026-07-10"
+    },
+    {
+      "company": "BF Investment Ltd",
+      "ticker": "BFINVEST.NS",
+      "amount": "Final Dividend",
+      "exDate": "2026-07-03"
+    },
+    {
+      "company": "Nestle India Ltd",
+      "ticker": "NESTLEIND.NS",
+      "amount": "Interim Dividend",
+      "exDate": "2026-07-09"
+    },
+    {
+      "company": "Axis Bank Ltd",
+      "ticker": "AXISBANK.NS",
+      "amount": "Final Dividend",
+      "exDate": "2026-07-10"
+    },
+    {
+      "company": "Hindalco Industries Ltd",
+      "ticker": "HINDALCO.NS",
+      "amount": "Final Dividend",
+      "exDate": "2026-07-10"
+    }
+  ],
+  "upcomingBuybacks": [
+    {
+      "company": "Wipro Limited",
+      "ticker": "WIPRO.NS",
+      "price": "₹445.00",
+      "exDate": "2026-07-08"
+    },
+    {
+      "company": "Bajaj Auto Ltd",
+      "ticker": "BAJAJ-AUTO.NS",
+      "price": "₹10,000.00",
+      "exDate": "2026-07-25"
+    }
+  ],
+  "upcomingSplits": [
+    {
+      "company": "DSP Nifty Midcap 150 Quality 50 ETF",
+      "ticker": "MIDQ50CASE.NS",
+      "ratio": "10:1 split",
+      "exDate": "2026-07-03"
+    },
+    {
+      "company": "DSP Nifty Healthcare ETF",
+      "ticker": "NETF.NS",
+      "ratio": "10:1 split",
+      "exDate": "2026-07-03"
+    },
+    {
+      "company": "Mangalam Worldwide Ltd",
+      "ticker": "MWL.NS",
+      "ratio": "10:1 split",
+      "exDate": "2026-07-10"
+    },
+    {
+      "company": "Indian Toners & Developers Ltd",
+      "ticker": "INDTONER.BO",
+      "ratio": "10:2 split",
+      "exDate": "2026-07-17"
+    }
+  ],
+  "upcomingMainboardIPOs": [
+    {
+      "company": "Knack Packaging Ltd",
+      "priceBand": "₹161 - ₹170",
+      "openDate": "2026-07-01",
+      "closeDate": "2026-07-03",
+      "size": "₹180 Cr"
+    },
+    {
+      "company": "Aastha Spintex Ltd",
+      "priceBand": "₹125 - ₹136",
+      "openDate": "2026-06-29",
+      "closeDate": "2026-07-01",
+      "size": "₹210 Cr"
+    }
+  ],
+  "upcomingSmeIPOs": [
+    {
+      "company": "Kratikal Tech Ltd",
+      "priceBand": "₹128 - ₹135",
+      "openDate": "2026-06-30",
+      "closeDate": "2026-07-02",
+      "size": "₹28 Cr"
+    },
+    {
+      "company": "Seemax Resources Ltd",
+      "priceBand": "₹134 - ₹141",
+      "openDate": "2026-06-30",
+      "closeDate": "2026-07-02",
+      "size": "₹34 Cr"
+    },
+    {
+      "company": "Atharva Polyplast Ltd",
+      "priceBand": "₹55 - ₹60",
+      "openDate": "2026-06-30",
+      "closeDate": "2026-07-02",
+      "size": "₹18 Cr"
+    },
+    {
+      "company": "Sampark India Logistics Ltd",
+      "priceBand": "₹80 - ₹84",
+      "openDate": "2026-06-30",
+      "closeDate": "2026-07-02",
+      "size": "₹25 Cr"
+    },
+    {
+      "company": "Twinkle Papers Ltd",
+      "priceBand": "₹64 - ₹69",
+      "openDate": "2026-06-29",
+      "closeDate": "2026-07-01",
+      "size": "₹15 Cr"
+    },
+    {
+      "company": "Adon Agro Commodities Ltd",
+      "priceBand": "₹66 - ₹70",
+      "openDate": "2026-06-29",
+      "closeDate": "2026-07-01",
+      "size": "₹12 Cr"
+    }
+  ]
+}

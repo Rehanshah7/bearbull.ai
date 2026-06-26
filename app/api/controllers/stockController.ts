@@ -27,9 +27,12 @@ export class StockController {
       );
     }
 
+    const { searchParams } = new URL(req.url);
+    const interval = searchParams.get("interval") || "15m";
+
     try {
       // 1. Try direct quote and history retrieval by symbol
-      const data = await StockService.getStockData(ticker);
+      const data = await StockService.getStockData(ticker, interval);
       
       // Fetch Gemini AI insights and append to data
       try {
@@ -48,7 +51,7 @@ export class StockController {
         if (searchResults && searchResults.length > 0) {
           const firstSymbol = searchResults[0].symbol;
           if (firstSymbol && firstSymbol.toUpperCase() !== ticker.toUpperCase()) {
-            const data = await StockService.getStockData(firstSymbol);
+            const data = await StockService.getStockData(firstSymbol, interval);
             try {
               const aiInsights = await getStockInsights(firstSymbol, data);
               (data as any).aiInsights = aiInsights;
